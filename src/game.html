@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<script type="text/javascript" src="cake.js"></script>
+<style>
+  html, body{
+      height: 100%;
+      width: 100%;
+      background: black;
+      overflow: hidden;
+      font-style: sans-serif;
+  }
+  canvas {
+      z-index: -1;
+  }
+  #score-box {
+      font-size: 30px;
+      z-index: 1;
+  }
+</style>
+</head>
+<body>
+    <div id="score-box" style="color: white; position: absolute; left: 30px; top: 50%;">
+        <h1 id="score">Player Score: 0<br>AI Score: 0</h1>
+    </div>
+    <script language="javascript">
+
+var playerScore = 0;
+var aiScore = 0;
+window.onload = function() {
+    var height = 1730;
+    var width = 960;
+    var r = 20;
+    var cena = new Canvas(document.body, width, height, {fill:'black'});
+    var bola = new Circle(r, {id: 'bola', x: 200,  y: 100, fill: 'white'});
+	
+    var barra_esquerda = new Rectangle(200, 30, {x: (20), y: (height - 60), fill: 'white'});
+    var barra_direita = new Rectangle(200, 30, {x: (20), y: 40, fill: 'white'});
+
+	var speedx = 18;
+    var speedy = 18;
+
+    function resetBall(){
+        bola.x = width / 2;
+        bola.y = height / 2;
+    }
+
+    function updateScore(){
+        if(aiScore > 9 || playerScore > 9){
+            window.location.href = './over.html';
+        }
+        document.getElementById('score').innerText = ('Player Score: ' + playerScore + '\nAI Score: ' + aiScore);
+    }
+	
+	bola.verificaDirecao = function() {
+		if (this.x > width)
+		    speedx = speedx * -1;
+		if (this.y > height)
+		    speedy = speedy * -1;
+		if (this.x < r / 2)
+		    speedx = speedx * -1;
+		if (this.y < r / 2)
+		    speedy = speedy * -1;
+	}
+	
+	bola.addFrameListener(function(t, dt) {
+            var touching_player_bar = (bola.y + r) >= (barra_esquerda.y)  && bola.x >= barra_esquerda.x && (bola.x + r) <= (barra_esquerda.x + barra_esquerda.width);
+            var touching_ai_bar = (bola.y) <= (barra_direita.y + barra_direita.height) && bola.x >= barra_direita.x && (bola.x + r) <= (barra_direita.x + barra_direita.width);
+            if(touching_player_bar || touching_ai_bar){
+                speedy *= -1;
+            }
+
+            var past_player_bar = (bola.y + r) > barra_esquerda.y + barra_esquerda.height;
+            var past_ai_bar = bola.y < (barra_direita + barra_direita.height);
+            if(past_player_bar){
+                aiScore += 1;
+                updateScore();
+                resetBall();
+            }
+            if(past_ai_bar){
+                playerScore += 1;
+                updateScore();
+                resetBall();
+            }
+			this.x += speedx;
+			this.y += speedy;
+            var randomNumber = Math.floor(Math.random() * speedx);
+            barra_direita.x = bola.x + randomNumber;
+			
+            this.verificaDirecao();
+    });
+    
+    document.addEventListener("touchmove", function(event) {
+        barra_esquerda.x = event.changedTouches[0].pageX - (barra_esquerda.width / 2);
+    });
+    
+    cena.append(barra_esquerda);
+    cena.append(barra_direita);
+    
+    cena.append(bola);
+
+};
+
+
+</script>
+</body>
+</html>
